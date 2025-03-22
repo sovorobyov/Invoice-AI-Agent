@@ -1,6 +1,6 @@
-import {NextResponse} from 'next/server';
-import {z} from 'zod';
-import {auth} from '@/app/(auth)/auth';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { auth } from '@/app/(auth)/auth';
 
 // Use Blob instead of File since File is not available in Node.js environment
 const FileSchema = z.object({
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         url: dataURL,
         pathname: `/uploads/${uniqueFilename}`,
-        contentType: file.type
+        contentType: file.type,
       });
     } catch (error) {
       return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
