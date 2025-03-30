@@ -15,16 +15,21 @@ This document outlines the implementation plan for building an AI-powered invoic
 ## Phase 2: Core Infrastructure (2-3 hours)
 1. Implement file upload functionality
    - Set up file upload component with drag-and-drop support
+   - Ensure file upload can happen anywhere on the web page
+   - Have an indicator that file upload is possible by dragging a file into the window
    - Add file type validation (PDF, images)
    - Implement file size limits and error handling
-2. Create basic chat interface
-   - Implement chat UI using Shadcn components
-   - Set up message history management
-   - Add file upload integration with chat
-3. Set up AI agent framework
-   - Configure Vercel AI SDK
-   - Implement basic prompt templates
-   - Set up Claude 3.5 Sonnet integration
+   - Only allow for uploading 1 invoice at a time
+      - throw an error when a second file is uploaded
+      - allow deleting the current uploaded file
+2. Enhance existing chat interface
+   - Extend current Shadcn chat UI for invoice context
+   - Leverage existing message history system
+   - Integrate file upload with chat flow
+3. Extend AI agent framework
+   - Use existing Vercel AI SDK configuration
+   - Adapt current prompt templates for invoice processing
+   - Utilize established Claude integration
 
 ## Phase 3: Invoice Processing Logic (2-3 hours)
 1. Implement invoice validation
@@ -40,19 +45,54 @@ This document outlines the implementation plan for building an AI-powered invoic
    - Add line items management
    - Set up duplicate checking logic
 
-## Phase 4: Invoice Management Interface (2-3 hours)
-1. Create invoice table component
+## Phase 4: Invoice Management Interface (3-4 hours)
+1. Set up navigation and routing
+   - Create "Invoices" page route
+   - Add navigation menu component
+   - Implement navigation between chat and invoices pages
+   - Add breadcrumb navigation
+2. Create invoice table component
    - Implement sorting functionality
    - Add filtering capabilities
    - Create inline editing interface
-2. Build invoice details view
+   - Add pagination controls
+   - Implement search functionality
+3. Build invoice details view
    - Add detailed invoice information display
    - Implement line items table
    - Create edit/update functionality
-3. Add token usage tracking
-   - Implement token counting
-   - Create cost calculation
-   - Add usage statistics display
+   - Add "Back to Invoices" navigation
+## Phase 4.5: Analytics Dashboard (2-3 hours)
+1. Create Analytics page route
+   - Add "Analytics" to navigation menu
+   - Implement /analytics route
+   - Add breadcrumb navigation
+   - Create analytics page layout
+
+2. Build token usage chart
+   - Implement interactive line chart showing average daily token usage
+   - Add toggles for input vs output tokens
+   - Include cost trend overlay
+   - Add date range selector
+   - Implement hover tooltips with detailed metrics
+
+3. Create usage details table
+   - Build sortable table with columns:
+     - Date/Time
+     - Invoice Number (linked to invoice details)
+     - Input Tokens
+     - Output Tokens
+     - Total Cost
+     - Model Used
+   - Add pagination controls
+   - Implement reverse chronological sorting
+   - Add CSV export functionality
+
+4. Add summary statistics
+   - Display total tokens used (MTD/YTD)
+   - Show average cost per invoice
+   - Calculate cost projections
+   - Highlight usage anomalies
 
 ## Phase 5: AI Agent Enhancement (2-3 hours)
 1. Implement prompt caching

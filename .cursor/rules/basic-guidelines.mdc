@@ -1,10 +1,18 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: true
 ---
+## My Preferences
+- Before recommending any changes, always layout the plan for the next step to be taken via a MECE task breakdown
+- Please refer back to [requirements.txt](mdc:requirements.txt) and [execution-plan.txt](mdc:execution-plan.txt) for understanding the context in which you are executing
+- Make sure to take into account the existing code base when introducing functionality, never duplicate existing functionality
+- Never leave files with incomplete code, please ensure your recommendations are complete
+- Please stop to get confirmation after each code change recommendation so I can ask follow up questions or make adjustments
 
-# Your rule content
-
-- You can @ files here
-- You can use markdown but dont have to
+## How to approach making code changes
+- Read relevant code sections before editing
+- Preserve existing functionality
+- Maintain type safety
+- Treat your project as a real production system, sharing terminal outputs and logs for iterative improvement
+- Code changes should be well documented

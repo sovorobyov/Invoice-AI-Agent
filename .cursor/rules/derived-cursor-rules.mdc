@@ -1,0 +1,55 @@
+---
+description: Cursor rules derived by SpecStory from the project AI interaction history
+globs: *
+---
+
+## PROJECT OVERVIEW
+This project aims to build an AI-powered invoice processing system.  The system will allow company admins to upload vendor invoices and automatically extract, validate, and manage invoice information.  A conversational interface will enhance user interaction.  The system should support drag-and-drop file uploads anywhere on the webpage.  This functionality has been implemented as of 2025-03-30.
+
+## CODE STYLE
+Follow TypeScript best practices. Maintain clean code structure.  Adhere to the established ESLint rules defined in `.eslintrc.json`.
+
+## FOLDER ORGANIZATION
+The project follows a structured folder organization as detailed in the project structure provided.  This includes separation of components, blocks, hooks, and libraries.
+
+## TECH STACK
+- Frontend: Next.js 14+, Shadcn, Tailwind CSS, React hooks, PDF.js
+- Backend: Next.js API routes
+- Database: SQLite with Drizzle ORM
+- AI: Claude 3.5 Sonnet, OpenAI GPT-4, Vercel AI SDK
+- Package Manager: pnpm
+- Other Libraries:  @ai-sdk/fireworks, @ai-sdk/openai, @codemirror/lang-javascript, @codemirror/lang-python, @codemirror/state, @codemirror/theme-one-dark, @codemirror/view, @radix-ui/react-alert-dialog, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-icons, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-separator, @radix-ui/react-slot, @radix-ui/react-tooltip, @radix-ui/react-visually-hidden, ai, bcrypt-ts, better-sqlite3, class-variance-authority, classnames, clsx, codemirror, date-fns, diff-match-patch, dotenv, drizzle-orm, fast-deep-equal, framer-motion, geist, lucide-react, nanoid, next, next-auth, next-themes, orderedmap, papaparse, prosemirror-example-setup, prosemirror-inputrules, prosemirror-markdown, prosemirror-model, prosemirror-schema-basic, prosemirror-schema-list, prosemirror-state, prosemirror-view, react, react-data-grid, react-dom, react-markdown, react-resizable-panels, remark-gfm, server-only, sonner, swr, tailwind-merge, tailwindcss-animate, usehooks-ts, zod, @biomejs/biome, @tailwindcss/typography, @types/better-sqlite3, @types/d3-scale, @types/node, @types/papaparse, @types/pdf-parse, @types/react, @types/react-dom, drizzle-kit, eslint, eslint-config-next, eslint-config-prettier, eslint-import-resolver-typescript, eslint-plugin-tailwindcss, postcss, tailwindcss, tsx, typescript, sonner
+
+
+## PROJECT-SPECIFIC STANDARDS
+-  All invoices must be validated before processing.
+-  Duplicate invoice detection must be implemented using fuzzy matching and confidence scoring.
+-  Token usage should be tracked and optimized.
+
+## WORKFLOW & RELEASE RULES
+- Use pnpm for package management.  The command `pnpm db:migrate` should be used for database migrations.  If `pnpm install` results in ignored build scripts, run `pnpm approve-builds` and select the necessary packages (e.g., `better-sqlite3`).
+- Follow the execution plan outlined in `execution-plan.md`.
+- To resolve `better-sqlite3` build issues on macOS with Apple Silicon, ensure Xcode Command Line Tools are installed (`xcode-select -p`), then run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` to approve the build for `better-sqlite3`.  If the command `pnpm migrate` fails, use `pnpm db:migrate` instead.
+-  For resolving `better-sqlite3` build issues, run `xcode-select -p`, then `rm -rf node_modules && pnpm install`, followed by `pnpm approve-builds` for `better-sqlite3`. If `pnpm migrate` fails, use `pnpm db:migrate`.
+- As of 2025-03-30,  `pnpm db:migrate` is the correct command for database migrations.  The previous `pnpm migrate` command is deprecated.
+
+
+## REFERENCE EXAMPLES
+Refer to the `execution-plan.md` document for a detailed breakdown of the implementation plan.
+
+## PROJECT DOCUMENTATION & CONTEXT SYSTEM
+Documentation is maintained in the `docs` folder using markdown files (e.g., `01-quick-start.md`, `02-update-models.md`, `03-blocks.md`). The execution plan is documented in `execution-plan.md` and `execution-plan.txt`.  `execution-plan.md` is the preferred and updated version.
+
+## DEBUGGING
+- For debugging `better-sqlite3` issues on macOS with Apple Silicon, ensure Xcode Command Line Tools are installed (`xcode-select -p`), then run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` to approve the build for `better-sqlite3`.
+- As of 2025-03-30, if `pnpm install` fails due to missing build tools, ensure Xcode Command Line Tools are installed using `xcode-select -p`. Then, run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` for `better-sqlite3`.
+
+
+## FINAL DOs AND DON'Ts
+- **DO** follow the established code style and folder organization.
+- **DO** use the specified tech stack and libraries.
+- **DO** test thoroughly before releasing any changes.
+- **DO** document all changes and updates.
+- **DON'T** commit unnecessary changes.
+- **DON'T** introduce breaking changes without proper communication and testing.
+- **DO** implement a webpage-wide drag-and-drop file upload functionality.  This functionality has been implemented as of 2025-03-30.
