@@ -1,0 +1,7 @@
+ignoredBuiltDependencies:
+  - '@biomejs/biome'
+  - bufferutil
+  - esbuild
+  - sharp
+onlyBuiltDependencies:
+  - better-sqlite3
