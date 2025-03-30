@@ -4,13 +4,13 @@ globs: *
 ---
 
 ## PROJECT OVERVIEW
-This project aims to build an AI-powered invoice processing system.  The system will allow company admins to upload vendor invoices and automatically extract, validate, and manage invoice information.  A conversational interface will enhance user interaction.  The system should support drag-and-drop file uploads anywhere on the webpage.  This functionality has been implemented as of 2025-03-30.
+This project aims to build an AI-powered invoice processing system.  The system will allow company admins to upload vendor invoices and automatically extract, validate, and manage invoice information.  A conversational interface will enhance user interaction.  The system should support drag-and-drop file uploads anywhere on the webpage. This functionality has been implemented as of 2025-03-30.
 
 ## CODE STYLE
 Follow TypeScript best practices. Maintain clean code structure.  Adhere to the established ESLint rules defined in `.eslintrc.json`.
 
 ## FOLDER ORGANIZATION
-The project follows a structured folder organization as detailed in the project structure provided.  This includes separation of components, blocks, hooks, and libraries.
+The project follows a structured folder organization as detailed in the project structure provided.  This includes separation of components, blocks, hooks, and libraries.  The `lib/db/schema` folder now contains separate files for each domain's schema definitions for improved readability.
 
 ## TECH STACK
 - Frontend: Next.js 14+, Shadcn, Tailwind CSS, React hooks, PDF.js
@@ -32,6 +32,8 @@ The project follows a structured folder organization as detailed in the project 
 - To resolve `better-sqlite3` build issues on macOS with Apple Silicon, ensure Xcode Command Line Tools are installed (`xcode-select -p`), then run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` to approve the build for `better-sqlite3`.  If the command `pnpm migrate` fails, use `pnpm db:migrate` instead.
 -  For resolving `better-sqlite3` build issues, run `xcode-select -p`, then `rm -rf node_modules && pnpm install`, followed by `pnpm approve-builds` for `better-sqlite3`. If `pnpm migrate` fails, use `pnpm db:migrate`.
 - As of 2025-03-30,  `pnpm db:migrate` is the correct command for database migrations.  The previous `pnpm migrate` command is deprecated.
+- If `pnpm install` fails due to missing build tools, ensure Xcode Command Line Tools are installed using `xcode-select -p`. Then, run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` for `better-sqlite3`.
+-  If `npm` command is not found, Node.js and npm need to be installed.  On macOS, use Homebrew.
 
 
 ## REFERENCE EXAMPLES
@@ -43,7 +45,7 @@ Documentation is maintained in the `docs` folder using markdown files (e.g., `01
 ## DEBUGGING
 - For debugging `better-sqlite3` issues on macOS with Apple Silicon, ensure Xcode Command Line Tools are installed (`xcode-select -p`), then run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` to approve the build for `better-sqlite3`.
 - As of 2025-03-30, if `pnpm install` fails due to missing build tools, ensure Xcode Command Line Tools are installed using `xcode-select -p`. Then, run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` for `better-sqlite3`.
-
+- To debug missing `npm` command, ensure Node.js and npm are installed. On macOS, use Homebrew.
 
 ## FINAL DOs AND DON'Ts
 - **DO** follow the established code style and folder organization.

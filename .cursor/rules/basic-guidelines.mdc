@@ -16,3 +16,5 @@ alwaysApply: true
 - Maintain type safety
 - Treat your project as a real production system, sharing terminal outputs and logs for iterative improvement
 - Code changes should be well documented
+- Resolve lint errors immediately
+- whenever refactoring, remove any old code and ensure no code duplication remains related to the code changes
