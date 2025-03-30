@@ -1363,6 +1363,1458 @@ Let me implement this step by step:
 
 ---
 
+```diff
+- 
++ import {
++   sqliteTable,
++   text,
++   integer,
++   blob,
++   primaryKey,
++ } from 'drizzle-orm/sqlite-core';
++ import type { InferSelectModel } from 'drizzle-orm';
++ 
++ export const chat = sqliteTable('Chat', {
++   id: text('id').primaryKey().notNull(),
++   createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
++   title: text('title').notNull(),
++   visibility: text('visibility')
++     .notNull()
++     .default('private')
++     .$type<'public' | 'private'>(),
++ });
++ 
++ export const message = sqliteTable('Message', {
++   id: text('id').primaryKey().notNull(),
++   chatId: text('chatId')
++     .notNull()
++     .references(() => chat.id),
++   role: text('role').notNull(),
++   content: blob('content', { mode: 'json' }).notNull(),
++   createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
++ });
++ 
++ export const vote = sqliteTable(
++   'Vote',
++   {
++     chatId: text('chatId')
++       .notNull()
++       .references(() => chat.id),
++     messageId: text('messageId')
++       .notNull()
++       .references(() => message.id),
++     isUpvoted: integer('isUpvoted', { mode: 'boolean' }).notNull(),
++   },
++   (table) => {
++     return {
++       pk: primaryKey({ columns: [table.chatId, table.messageId] }),
++     };
++   },
++ );
++ 
++ export type Chat = InferSelectModel<typeof chat>;
++ export type Message = InferSelectModel<typeof message>;
++ export type Vote = InferSelectModel<typeof vote>; 
+```
+
+---
+
+2. Next, let's create the document schema file:
+
+---
+
+```diff
+- 
++ import {
++   sqliteTable,
++   text,
++   integer,
++   primaryKey,
++ } from 'drizzle-orm/sqlite-core';
++ import type { InferSelectModel } from 'drizzle-orm';
++ 
++ export const document = sqliteTable(
++   'Document',
++   {
++     id: text('id').notNull(),
++     createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
++     title: text('title').notNull(),
++     content: text('content'),
++     kind: text('kind')
++       .notNull()
++       .default('text')
++       .$type<'text' | 'code' | 'image' | 'sheet'>(),
++   },
++   (table) => {
++     return {
++       pk: primaryKey({ columns: [table.id, table.createdAt] }),
++     };
++   },
++ );
++ 
++ export type Document = InferSelectModel<typeof document>; 
+```
+
+---
+
+3. Let's create the suggestion schema file:
+
+---
+
+```diff
+- 
++ import {
++   sqliteTable,
++   text,
++   integer,
++   primaryKey,
++   foreignKey,
++ } from 'drizzle-orm/sqlite-core';
++ import type { InferSelectModel } from 'drizzle-orm';
++ import { document } from './document';
++ 
++ export const suggestion = sqliteTable(
++   'Suggestion',
++   {
++     id: text('id').notNull(),
++     documentId: text('documentId').notNull(),
++     documentCreatedAt: integer('documentCreatedAt', {
++       mode: 'timestamp',
++     }).notNull(),
++     originalText: text('originalText').notNull(),
++     suggestedText: text('suggestedText').notNull(),
++     description: text('description'),
++     isResolved: integer('isResolved', { mode: 'boolean' })
++       .notNull()
++       .default(false),
++     createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
++   },
++   (table) => ({
++     pk: primaryKey({ columns: [table.id] }),
++     documentRef: foreignKey(() => ({
++       columns: [table.documentId, table.documentCreatedAt],
++       foreignColumns: [document.id, document.createdAt],
++     })),
++   }),
++ );
++ 
++ export type Suggestion = InferSelectModel<typeof suggestion>; 
+```
+
+---
+
+4. Let's split the invoice schema into separate files. First, let's create the line-item schema:
+
+---
+
+```diff
+- 
++ import {
++   sqliteTable,
++   text,
++   integer,
++   real,
++ } from 'drizzle-orm/sqlite-core';
++ import type { InferSelectModel } from 'drizzle-orm';
++ import { invoices } from './invoice';
++ 
++ export const lineItems = sqliteTable('line_items', {
++   id: text('id').primaryKey().notNull(),
++   invoiceId: text('invoice_id')
++     .notNull()
++     .references(() => invoices.id, { onDelete: 'cascade' }),
++   description: text('description').notNull(),
++   quantity: integer('quantity').notNull(),
++   unitPrice: real('unit_price').notNull(),
++   total: real('total').notNull(),
++   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
++   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
++ });
++ 
++ export type LineItem = InferSelectModel<typeof lineItems>; 
+```
+
+---
+
+5. Let's create the invoice schema file:
+
+---
+
+```diff
+- 
++ import {
++   sqliteTable,
++   text,
++   integer,
++   real,
++ } from 'drizzle-orm/sqlite-core';
++ import type { InferSelectModel } from 'drizzle-orm';
++ 
++ export const invoices = sqliteTable('invoices', {
++   id: text('id').primaryKey().notNull(),
++   customerName: text('customer_name').notNull(),
++   vendorName: text('vendor_name').notNull(),
++   invoiceNumber: text('invoice_number').notNull(),
++   invoiceDate: integer('invoice_date', { mode: 'timestamp' }).notNull(),
++   dueDate: integer('due_date', { mode: 'timestamp' }).notNull(),
++   amount: real('amount').notNull(),
++   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
++   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
++ });
++ 
++ export type Invoice = InferSelectModel<typeof invoices>; 
+```
+
+---
+
+6. Let's create the token usage schema file:
+
+---
+
+```diff
+- 
++ import {
++   sqliteTable,
++   text,
++   integer,
++   real,
++ } from 'drizzle-orm/sqlite-core';
++ import type { InferSelectModel } from 'drizzle-orm';
++ import { invoices } from './invoice';
++ 
++ export const tokenUsage = sqliteTable('token_usage', {
++   id: text('id').primaryKey().notNull(),
++   invoiceId: text('invoice_id')
++     .notNull()
++     .references(() => invoices.id, { onDelete: 'cascade' }),
++   inputTokens: integer('input_tokens').notNull(),
++   outputTokens: integer('output_tokens').notNull(),
++   cost: real('cost').notNull(),
++   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
++ });
++ 
++ export type TokenUsage = InferSelectModel<typeof tokenUsage>; 
+```
+
+---
+
+7. Finally, let's update the main schema index file:
+
+---
+
+```diff
+- 
++ // Chat-related exports
++ export * from './chat';
++ 
++ // Document-related exports
++ export * from './document';
++ export * from './suggestion';
++ 
++ // Invoice-related exports
++ export * from './invoice';
++ export * from './line-item';
++ export * from './token-usage'; 
+```
+
+---
+
+8. Now let's update the main schema.ts file to use our new structure:
+
+---
+
+```diff
+  // Export invoice-related tables
+  export * from './schema/invoices';
++ 
++ // Re-export all schema components
++ export * from './schema';
+  
+```
+
+---
+
+I've completed the schema refactoring. Here's a summary of the changes:
+
+1. Split the schema into logical domains:
+   - Chat-related tables (`chat.ts`)
+   - Document-related tables (`document.ts`, `suggestion.ts`)
+   - Invoice-related tables (`invoice.ts`, `line-item.ts`, `token-usage.ts`)
+
+2. Created a clean index file (`index.ts`) that exports all schema components
+
+3. Each file now:
+   - Contains only related tables and types
+   - Has clear imports and exports
+   - Follows consistent naming conventions
+   - Maintains type safety with proper references
+
+There are a couple of linter errors to fix:
+1. The circular dependency in schema.ts (it's trying to import itself)
+2. The missing module error in line-item.ts
+
+Would you like me to fix these issues before proceeding?
+
+---
+
+_**User**_
+
+let's proceed with Phase 2 implementation
+
+---
+
+_**Assistant**_
+
+I'll help you implement Phase 2: Core Infrastructure, focusing on the file upload functionality first. Let's break this down into manageable steps:
+
+Phase 2 Implementation Plan:
+1. File Upload System
+   - Create a reusable Dropzone component
+   - Implement file validation
+   - Add visual feedback for drag and drop
+   - Handle file upload errors
+
+2. Chat Interface
+   - Build chat UI components
+   - Integrate file upload
+   - Add message history
+   - Implement streaming responses
+
+3. AI Integration
+   - Configure Vercel AI SDK
+   - Set up Claude integration
+   - Create base prompts
+   - Handle streaming
+
+Let's start with the file upload system:
+
+---
+
+```diff
+- 
++ import React, { useCallback, useState } from 'react';
++ import { cn } from '@/lib/utils';
++ import { UploadIcon } from 'lucide-react';
++ 
++ export interface DropzoneProps {
++   onFilesAccepted: (files: File[]) => void;
++   maxSize?: number; // in bytes
++   accept?: string[];
++   className?: string;
++   disabled?: boolean;
++ }
++ 
++ export function Dropzone({
++   onFilesAccepted,
++   maxSize = 5 * 1024 * 1024, // 5MB default
++   accept = ['application/pdf', 'image/png', 'image/jpeg'],
++   className,
++   disabled = false,
++ }: DropzoneProps) {
++   const [isDragging, setIsDragging] = useState(false);
++ 
++   const handleDragEnter = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++     if (!disabled) setIsDragging(true);
++   }, [disabled]);
++ 
++   const handleDragLeave = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++     setIsDragging(false);
++   }, []);
++ 
++   const handleDragOver = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++   }, []);
++ 
++   const validateFiles = useCallback((files: File[]): string | null => {
++     for (const file of files) {
++       if (!accept.includes(file.type)) {
++         return `File type ${file.type} is not supported. Please upload ${accept.join(', ')} files only.`;
++       }
++       if (file.size > maxSize) {
++         return `File ${file.name} is too large. Maximum size is ${maxSize / 1024 / 1024}MB.`;
++       }
++     }
++     return null;
++   }, [accept, maxSize]);
++ 
++   const handleDrop = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++     setIsDragging(false);
++ 
++     if (disabled) return;
++ 
++     const droppedFiles = Array.from(e.dataTransfer.files);
++     const error = validateFiles(droppedFiles);
++     
++     if (error) {
++       console.error(error);
++       return;
++     }
++ 
++     onFilesAccepted(droppedFiles);
++   }, [disabled, validateFiles, onFilesAccepted]);
++ 
++   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
++     if (disabled || !e.target.files?.length) return;
++ 
++     const selectedFiles = Array.from(e.target.files);
++     const error = validateFiles(selectedFiles);
++     
++     if (error) {
++       console.error(error);
++       return;
++     }
++ 
++     onFilesAccepted(selectedFiles);
++     e.target.value = ''; // Reset input
++   }, [disabled, validateFiles, onFilesAccepted]);
++ 
++   return (
++     <div
++       className={cn(
++         'relative rounded-lg border-2 border-dashed border-gray-300 p-6 transition-colors',
++         isDragging && 'border-primary bg-primary/5',
++         disabled && 'cursor-not-allowed opacity-60',
++         className
++       )}
++       onDragEnter={handleDragEnter}
++       onDragLeave={handleDragLeave}
++       onDragOver={handleDragOver}
++       onDrop={handleDrop}
++     >
++       <input
++         type="file"
++         className="absolute inset-0 cursor-pointer opacity-0"
++         onChange={handleFileInput}
++         accept={accept.join(',')}
++         disabled={disabled}
++         multiple
++       />
++       <div className="flex flex-col items-center justify-center gap-2 text-center">
++         <UploadIcon className="h-8 w-8 text-gray-400" />
++         <div className="text-sm text-gray-600">
++           <span className="font-semibold">Click to upload</span> or drag and drop
++         </div>
++         <p className="text-xs text-gray-500">
++           PDF, PNG, JPG up to {maxSize / 1024 / 1024}MB
++         </p>
++       </div>
++     </div>
++   );
++ } 
+```
+
+---
+
+Now, let's create a component to display file upload progress and handle the upload queue:
+
+---
+
+```diff
+- 
++ import React from 'react';
++ import { X } from 'lucide-react';
++ import { cn } from '@/lib/utils';
++ import { Button } from './button';
++ import { Progress } from './progress';
++ 
++ export interface FileUploadStatus {
++   id: string;
++   file: File;
++   progress: number;
++   error?: string;
++   status: 'pending' | 'uploading' | 'complete' | 'error';
++ }
++ 
++ interface FileUploadQueueProps {
++   files: FileUploadStatus[];
++   onRemove: (id: string) => void;
++   className?: string;
++ }
++ 
++ export function FileUploadQueue({ files, onRemove, className }: FileUploadQueueProps) {
++   if (!files.length) return null;
++ 
++   return (
++     <div className={cn('space-y-2', className)}>
++       {files.map((file) => (
++         <div
++           key={file.id}
++           className="flex items-center gap-4 rounded-lg border p-4"
++         >
++           <div className="flex-1 min-w-0">
++             <div className="flex items-center justify-between">
++               <p className="text-sm font-medium truncate" title={file.file.name}>
++                 {file.file.name}
++               </p>
++               <Button
++                 variant="ghost"
++                 size="icon"
++                 className="h-8 w-8"
++                 onClick={() => onRemove(file.id)}
++               >
++                 <X className="h-4 w-4" />
++                 <span className="sr-only">Remove file</span>
++               </Button>
++             </div>
++             <div className="mt-2 space-y-1">
++               <Progress value={file.progress} className="h-1" />
++               {file.error && (
++                 <p className="text-xs text-destructive">{file.error}</p>
++               )}
++               <p className="text-xs text-muted-foreground">
++                 {file.status === 'complete'
++                   ? 'Upload complete'
++                   : file.status === 'error'
++                   ? 'Upload failed'
++                   : `${Math.round(file.progress)}% - ${
++                       file.status === 'uploading' ? 'Uploading...' : 'Pending...'
++                     }`}
++               </p>
++             </div>
++           </div>
++         </div>
++       ))}
++     </div>
++   );
++ } 
+```
+
+---
+
+Let's create the Progress component that we need:
+
+---
+
+```diff
+- 
++ import * as React from 'react';
++ import * as ProgressPrimitive from '@radix-ui/react-progress';
++ import { cn } from '@/lib/utils';
++ 
++ const Progress = React.forwardRef<
++   React.ElementRef<typeof ProgressPrimitive.Root>,
++   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
++ >(({ className, value, ...props }, ref) => (
++   <ProgressPrimitive.Root
++     ref={ref}
++     className={cn(
++       'relative h-2 w-full overflow-hidden rounded-full bg-primary/20',
++       className
++     )}
++     {...props}
++   >
++     <ProgressPrimitive.Indicator
++       className="h-full w-full flex-1 bg-primary transition-all"
++       style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
++     />
++   </ProgressPrimitive.Root>
++ ));
++ 
++ Progress.displayName = ProgressPrimitive.Root.displayName;
++ 
++ export { Progress }; 
+```
+
+---
+
+We need to install the missing Radix UI Progress component. Let's do that:
+
+---
+
+Cancelled
+
+---
+
+_**User**_
+
+does shadcn have a progress component?
+
+---
+
+_**Assistant**_
+
+Yes, Shadcn UI does have a Progress component! Let me help you install it using their CLI. This will automatically set up the component with all the necessary dependencies and styling.
+
+---
+
+```bash
+pnpm dlx shadcn-ui@latest add progress
+```
+
+```
+serhiyvorobyov@liccos-air hoai-2 % pnpm dlx shadcn-ui@latest add progress
+Packages: +2
+++
+Progress: resolved 2, reused 1, downloaded 1, added 2, done
+The 'shadcn-ui' package is deprecated. Please use the 'shadcn' package instead:
+
+  npx shadcn@latest add progress
+
+For more information, visit: https://ui.shadcn.com/docs/cli
+
+serhiyvorobyov@liccos-air hoai-2 %
+```
+
+---
+
+I see they've deprecated the old package name. Let's use the new one:
+
+---
+
+```bash
+pnpm dlx shadcn@latest add progress
+```
+
+```
+serhiyvorobyov@liccos-air hoai-2 % pnpm dlx shadcn@latest add progress
+Packages: +220
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 220, reused 76, downloaded 144, added 220, done
+✔ Checking registry.
+✔ Installing dependencies.
+? The file progress.tsx already exists. Would you like to overwrite? › (y/N)
+```
+
+---
+
+I see that the Progress component file already exists. Since we already have the component set up correctly (it matches the Shadcn implementation), we just need to install the missing Radix UI dependency:
+
+---
+
+```bash
+pnpm add @radix-ui/react-progress
+```
+
+```
+ WARN  deprecated eslint@8.57.1: This version is no longer supported. Please see
+ https://eslint.org/version-s
+upport for other options.
+                              WARN  7 deprecated subdependencies found: @esbuild
+-kit/core-utils@3.3.2, @esbuild-kit/esm-loader@2.6.5, @hum
+anwhocodes/config-array@0.13.0, @humanwhocodes/object-schema@2.0.3, glob@7.2.3,
+inflight@1.0.6, rimraf@3.0.2 Already up to date
+Progress: resolved 780, reused 683, downloaded 0, added 0, done
+ WARN  Issues with peer dependencies found
+.
+├─┬ next 15.0.3-canary.2
+│ ├── ✕ unmet peer react@"^18.2.0 || 19.0.0-rc-603e6108-20241029": found 19.0.0-
+rc-45804af1-20241021
+│ └── ✕ unmet peer react-dom@"^18.2.0 || 19.0.0-rc-603e6108-20241029": found 19.
+0.0-rc-45804af1-20241021
+├─┬ @radix-ui/react-alert-dialog 1.1.2
+│ └─┬ @radix-ui/react-dialog 1.1.2
+│   └─┬ react-remove-scroll 2.6.0
+│     ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.0.0-rc-45
+804af1-20241021
+│     ├─┬ react-remove-scroll-bar 2.3.6
+│     │ ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.0.0-rc-
+45804af1-20241021
+│     │ └─┬ react-style-singleton 2.2.1
+│     │   └── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.0.0-r
+c-45804af1-20241021
+│     ├─┬ use-callback-ref 1.3.2
+│     │ └── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.0.0-rc-
+45804af1-20241021
+│     └─┬ use-sidecar 1.1.2
+│       └── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.0.0-rc-
+45804af1-20241021
+├─┬ @radix-ui/react-icons 1.3.0
+│ └── ✕ unmet peer react@"^16.x || ^17.x || ^18.x": found 19.0.0-rc-45804af1-202
+41021
+├─┬ ai 4.1.17
+│ └─┬ @ai-sdk/react 1.1.8
+│   ├─┬ swr 2.2.5
+│   │ ├── ✕ unmet peer react@"^16.11.0 || ^17.0.0 || ^18.0.0": found 19.0.0-rc-4
+5804af1-20241021
+│   │ └─┬ use-sync-external-store 1.2.2
+│   │   └── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.0.0-rc-
+45804af1-20241021
+│   └─┬ @ai-sdk/ui-utils 1.1.8
+│     └─┬ zod-to-json-schema 3.24.1
+│       └── ✕ unmet peer zod@^3.24.1: found 3.23.8
+├─┬ framer-motion 11.11.10
+│ ├── ✕ unmet peer react@^18.0.0: found 19.0.0-rc-45804af1-20241021
+│ └── ✕ unmet peer react-dom@^18.0.0: found 19.0.0-rc-45804af1-20241021
+├─┬ next-themes 0.3.0
+│ ├── ✕ unmet peer react@"^16.8 || ^17 || ^18": found 19.0.0-rc-45804af1-2024102
+1
+│ └── ✕ unmet peer react-dom@"^16.8 || ^17 || ^18": found 19.0.0-rc-45804af1-202
+41021
+├─┬ sonner 1.5.0
+│ ├── ✕ unmet peer react@^18.0.0: found 19.0.0-rc-45804af1-20241021
+│ └── ✕ unmet peer react-dom@^18.0.0: found 19.0.0-rc-45804af1-20241021
+└─┬ usehooks-ts 3.1.0
+  └── ✕ unmet peer react@"^16.8.0  || ^17 || ^18": found 19.0.0-rc-45804af1-2024
+1021
+Done in 2.3s using pnpm v10.7.0
+
+```
+
+---
+
+Now that we have the Progress component dependency installed, let's also create the Button component since it's also missing:
+
+---
+
+Cancelled
+
+---
+
+_**User**_
+
+let's skip any changes related to progress component
+
+---
+
+_**Assistant**_
+
+I understand. Let's modify our approach to use a simpler file upload interface without the progress component. I'll update the components to focus on the core functionality:
+
+1. First, let's create a simple file upload component:
+
+---
+
+```diff
+- 
++ import React, { useCallback, useState } from 'react';
++ import { cn } from '@/lib/utils';
++ import { UploadIcon, X } from 'lucide-react';
++ 
++ export interface FileUploadProps {
++   onFilesAccepted: (files: File[]) => void;
++   maxSize?: number; // in bytes
++   accept?: string[];
++   className?: string;
++   disabled?: boolean;
++ }
++ 
++ interface FilePreview {
++   id: string;
++   file: File;
++ }
++ 
++ export function FileUpload({
++   onFilesAccepted,
++   maxSize = 5 * 1024 * 1024, // 5MB default
++   accept = ['application/pdf', 'image/png', 'image/jpeg'],
++   className,
++   disabled = false,
++ }: FileUploadProps) {
++   const [isDragging, setIsDragging] = useState(false);
++   const [selectedFiles, setSelectedFiles] = useState<FilePreview[]>([]);
++ 
++   const validateFiles = useCallback((files: File[]): string | null => {
++     for (const file of files) {
++       if (!accept.includes(file.type)) {
++         return `File type ${file.type} is not supported. Please upload ${accept.join(', ')} files only.`;
++       }
++       if (file.size > maxSize) {
++         return `File ${file.name} is too large. Maximum size is ${maxSize / 1024 / 1024}MB.`;
++       }
++     }
++     return null;
++   }, [accept, maxSize]);
++ 
++   const handleFiles = useCallback((files: File[]) => {
++     const error = validateFiles(files);
++     if (error) {
++       console.error(error);
++       return;
++     }
++ 
++     const newFiles = files.map(file => ({
++       id: crypto.randomUUID(),
++       file
++     }));
++ 
++     setSelectedFiles(prev => [...prev, ...newFiles]);
++     onFilesAccepted(files);
++   }, [validateFiles, onFilesAccepted]);
++ 
++   const handleDragEnter = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++     if (!disabled) setIsDragging(true);
++   }, [disabled]);
++ 
++   const handleDragLeave = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++     setIsDragging(false);
++   }, []);
++ 
++   const handleDragOver = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++   }, []);
++ 
++   const handleDrop = useCallback((e: React.DragEvent) => {
++     e.preventDefault();
++     e.stopPropagation();
++     setIsDragging(false);
++ 
++     if (disabled) return;
++ 
++     const droppedFiles = Array.from(e.dataTransfer.files);
++     handleFiles(droppedFiles);
++   }, [disabled, handleFiles]);
++ 
++   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
++     if (disabled || !e.target.files?.length) return;
++ 
++     const selectedFiles = Array.from(e.target.files);
++     handleFiles(selectedFiles);
++     e.target.value = ''; // Reset input
++   }, [disabled, handleFiles]);
++ 
++   const removeFile = useCallback((id: string) => {
++     setSelectedFiles(prev => prev.filter(file => file.id !== id));
++   }, []);
++ 
++   return (
++     <div className={cn('space-y-4', className)}>
++       <div
++         className={cn(
++           'relative rounded-lg border-2 border-dashed border-gray-300 p-6 transition-colors',
++           isDragging && 'border-primary bg-primary/5',
++           disabled && 'cursor-not-allowed opacity-60'
++         )}
++         onDragEnter={handleDragEnter}
++         onDragLeave={handleDragLeave}
++         onDragOver={handleDragOver}
++         onDrop={handleDrop}
++       >
++         <input
++           type="file"
++           className="absolute inset-0 cursor-pointer opacity-0"
++           onChange={handleFileInput}
++           accept={accept.join(',')}
++           disabled={disabled}
++           multiple
++         />
++         <div className="flex flex-col items-center justify-center gap-2 text-center">
++           <UploadIcon className="h-8 w-8 text-gray-400" />
++           <div className="text-sm text-gray-600">
++             <span className="font-semibold">Click to upload</span> or drag and drop
++           </div>
++           <p className="text-xs text-gray-500">
++             PDF, PNG, JPG up to {maxSize / 1024 / 1024}MB
++           </p>
++         </div>
++       </div>
++ 
++       {selectedFiles.length > 0 && (
++         <div className="space-y-2">
++           {selectedFiles.map((file) => (
++             <div
++               key={file.id}
++               className="flex items-center justify-between rounded-lg border p-3"
++             >
++               <span className="text-sm truncate" title={file.file.name}>
++                 {file.file.name}
++               </span>
++               <button
++                 onClick={() => removeFile(file.id)}
++                 className="ml-2 text-gray-500 hover:text-gray-700"
++               >
++                 <X className="h-4 w-4" />
++                 <span className="sr-only">Remove file</span>
++               </button>
++             </div>
++           ))}
++         </div>
++       )}
++     </div>
++   );
++ } 
+```
+
+---
+
+Now let's create a hook to handle the file upload logic:
+
+---
+
+```diff
+- 
++ import { useState, useCallback } from 'react';
++ 
++ export interface FileUploadState {
++   files: File[];
++   error: string | null;
++   isUploading: boolean;
++ }
++ 
++ interface UseFileUploadOptions {
++   onUploadComplete?: (files: File[]) => void;
++   onError?: (error: string) => void;
++ }
++ 
++ export function useFileUpload(options: UseFileUploadOptions = {}) {
++   const [state, setState] = useState<FileUploadState>({
++     files: [],
++     error: null,
++     isUploading: false,
++   });
++ 
++   const uploadFiles = useCallback(async (files: File[]) => {
++     setState(prev => ({ ...prev, isUploading: true, error: null }));
++ 
++     try {
++       // Here you would typically upload the files to your server
++       // For now, we'll just simulate a delay
++       await new Promise(resolve => setTimeout(resolve, 1000));
++ 
++       setState(prev => ({
++         ...prev,
++         files: [...prev.files, ...files],
++         isUploading: false,
++       }));
++ 
++       options.onUploadComplete?.(files);
++     } catch (error) {
++       const errorMessage = error instanceof Error ? error.message : 'Failed to upload files';
++       setState(prev => ({
++         ...prev,
++         error: errorMessage,
++         isUploading: false,
++       }));
++       options.onError?.(errorMessage);
++     }
++   }, [options]);
++ 
++   const clearFiles = useCallback(() => {
++     setState(prev => ({ ...prev, files: [], error: null }));
++   }, []);
++ 
++   const removeFile = useCallback((index: number) => {
++     setState(prev => ({
++       ...prev,
++       files: prev.files.filter((_, i) => i !== index),
++     }));
++   }, []);
++ 
++   return {
++     ...state,
++     uploadFiles,
++     clearFiles,
++     removeFile,
++   };
++ } 
+```
+
+---
+
+Now let's create a component that combines the file upload with the chat interface:
+
+---
+
+```diff
+- 
++ import React, { useCallback } from 'react';
++ import { FileUpload } from './ui/file-upload';
++ import { useFileUpload } from '@/hooks/use-file-upload';
++ import { cn } from '@/lib/utils';
++ 
++ interface InvoiceChatProps {
++   className?: string;
++ }
++ 
++ export function InvoiceChat({ className }: InvoiceChatProps) {
++   const {
++     files,
++     error,
++     isUploading,
++     uploadFiles,
++     removeFile,
++   } = useFileUpload({
++     onUploadComplete: (files) => {
++       // Here we would typically:
++       // 1. Process the files using AI
++       // 2. Extract invoice data
++       // 3. Store in database
++       // 4. Update chat with results
++       console.log('Files uploaded:', files);
++     },
++     onError: (error) => {
++       console.error('Upload error:', error);
++     },
++   });
++ 
++   const handleFilesAccepted = useCallback((files: File[]) => {
++     uploadFiles(files);
++   }, [uploadFiles]);
++ 
++   return (
++     <div className={cn('flex flex-col space-y-4', className)}>
++       <div className="flex-1 overflow-auto">
++         {/* Chat messages will go here */}
++       </div>
++ 
++       <div className="border-t pt-4">
++         <FileUpload
++           onFilesAccepted={handleFilesAccepted}
++           disabled={isUploading}
++         />
++         {error && (
++           <p className="mt-2 text-sm text-red-500">{error}</p>
++         )}
++       </div>
++     </div>
++   );
++ } 
+```
+
+---
+
+I've created three main components for the file upload system:
+
+1. `FileUpload` component (`components/ui/file-upload.tsx`):
+   - Handles drag and drop functionality
+   - Provides file selection via click
+   - Shows file previews
+   - Validates file types and sizes
+   - Allows file removal
+
+2. `useFileUpload` hook (`hooks/use-file-upload.ts`):
+   - Manages upload state
+   - Handles file upload logic
+   - Provides error handling
+   - Manages file list
+
+3. `InvoiceChat` component (`components/invoice-chat.tsx`):
+   - Combines file upload with chat interface
+   - Will be used to integrate with AI processing
+   - Prepared for chat message display
+
+Next steps:
+1. Would you like me to implement the chat message display functionality?
+2. Or should we move on to implementing the AI integration for processing the uploaded invoices?
+
+The components are designed to be modular and reusable, following TypeScript best practices and maintaining a clean code structure. Let me know which direction you'd like to proceed with.
+
+---
+
+_**User**_
+
+implement Would you like me to implement the chat message display functionality?
+
+---
+
+_**Assistant**_
+
+I'll help you implement the chat message display functionality. Let's create the necessary components:
+
+1. First, let's create a Message component for individual chat messages:
+
+---
+
+```diff
+- 
++ import React from 'react';
++ import { cn } from '@/lib/utils';
++ import { BotIcon, UserIcon } from 'lucide-react';
++ import ReactMarkdown from 'react-markdown';
++ 
++ export interface Message {
++   id: string;
++   role: 'user' | 'assistant';
++   content: string;
++   createdAt: Date;
++ }
++ 
++ interface MessageProps {
++   message: Message;
++   className?: string;
++ }
++ 
++ export function Message({ message, className }: MessageProps) {
++   const isUser = message.role === 'user';
++ 
++   return (
++     <div
++       className={cn(
++         'flex w-full items-start gap-4 py-4',
++         isUser ? 'flex-row' : 'flex-row',
++         className
++       )}
++     >
++       <div className={cn(
++         'flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border shadow',
++         isUser ? 'bg-background' : 'bg-primary/10'
++       )}>
++         {isUser ? (
++           <UserIcon className="h-4 w-4" />
++         ) : (
++           <BotIcon className="h-4 w-4" />
++         )}
++       </div>
++       <div className="flex-1 space-y-2">
++         <div className="prose prose-sm max-w-none dark:prose-invert">
++           <ReactMarkdown>{message.content}</ReactMarkdown>
++         </div>
++         <div className="text-xs text-muted-foreground">
++           {new Date(message.createdAt).toLocaleTimeString()}
++         </div>
++       </div>
++     </div>
++   );
++ } 
+```
+
+---
+
+2. Now, let's create a MessageList component to display all messages:
+
+---
+
+```diff
+- 
++ import React, { useEffect, useRef } from 'react';
++ import { Message } from './message';
++ import type { Message as MessageType } from './message';
++ import { cn } from '@/lib/utils';
++ 
++ interface MessageListProps {
++   messages: MessageType[];
++   className?: string;
++ }
++ 
++ export function MessageList({ messages, className }: MessageListProps) {
++   const scrollRef = useRef<HTMLDivElement>(null);
++ 
++   // Scroll to bottom when new messages arrive
++   useEffect(() => {
++     if (scrollRef.current) {
++       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
++     }
++   }, [messages]);
++ 
++   if (!messages.length) {
++     return (
++       <div className="flex h-full items-center justify-center">
++         <p className="text-sm text-muted-foreground">
++           Upload an invoice to start the conversation
++         </p>
++       </div>
++     );
++   }
++ 
++   return (
++     <div
++       ref={scrollRef}
++       className={cn('flex flex-col space-y-4 overflow-y-auto', className)}
++     >
++       {messages.map((message) => (
++         <Message key={message.id} message={message} />
++       ))}
++     </div>
++   );
++ } 
+```
+
+---
+
+3. Now, let's update the InvoiceChat component to include the message functionality:
+
+---
+
+```diff
+- import React, { useCallback } from 'react';
++ import React, { useCallback, useState } from 'react';
+  import { FileUpload } from './ui/file-upload';
+  import { useFileUpload } from '@/hooks/use-file-upload';
+  import { cn } from '@/lib/utils';
++ import { MessageList } from './chat/message-list';
++ import type { Message } from './chat/message';
+  
+  interface InvoiceChatProps {
+    className?: string;
+  }
++ 
++ const WELCOME_MESSAGE: Message = {
++   id: 'welcome',
++   role: 'assistant',
++   content: 'Welcome! I can help you process and analyze invoices. Upload an invoice to get started.',
++   createdAt: new Date(),
++ };
+  
+  export function InvoiceChat({ className }: InvoiceChatProps) {
++   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
++ 
+    const {
+      files,
+    } = useFileUpload({
+      onUploadComplete: (files) => {
++       // Add a user message for the upload
++       const fileNames = files.map(f => f.name).join(', ');
++       setMessages(prev => [...prev, {
++         id: crypto.randomUUID(),
++         role: 'user',
++         content: `Uploaded: ${fileNames}`,
++         createdAt: new Date(),
++       }]);
++ 
++       // Add an assistant message acknowledging the upload
++       setMessages(prev => [...prev, {
++         id: crypto.randomUUID(),
++         role: 'assistant',
++         content: `I'll analyze the following invoice(s): ${fileNames}. Please wait while I process them...`,
++         createdAt: new Date(),
++       }]);
++ 
+        // Here we would typically:
+        // 1. Process the files using AI
+      },
+      onError: (error) => {
++       // Add an error message to the chat
++       setMessages(prev => [...prev, {
++         id: crypto.randomUUID(),
++         role: 'assistant',
++         content: `Error: ${error}`,
++         createdAt: new Date(),
++       }]);
+        console.error('Upload error:', error);
+      },
+  
+    return (
+-     <div className={cn('flex flex-col space-y-4', className)}>
+-       <div className="flex-1 overflow-auto">
+-         {/* Chat messages will go here */}
++     <div className={cn('flex h-[600px] flex-col space-y-4', className)}>
++       <div className="flex-1 overflow-hidden rounded-lg border bg-background shadow">
++         <MessageList messages={messages} className="h-full p-4" />
+        </div>
+  
+-       <div className="border-t pt-4">
++       <div className="rounded-lg border bg-background p-4 shadow">
+          <FileUpload
+            onFilesAccepted={handleFilesAccepted}
+            disabled={isUploading}
+          />
+          {error && (
+-           <p className="mt-2 text-sm text-red-500">{error}</p>
++           <p className="mt-2 text-sm text-destructive">{error}</p>
+          )}
+        </div>
+```
+
+---
+
+I've implemented a complete chat message display system with the following features:
+
+1. Message Component (`components/chat/message.tsx`):
+   - Displays individual messages with user/assistant icons
+   - Supports markdown content
+   - Shows timestamp for each message
+   - Different styling for user and assistant messages
+
+2. MessageList Component (`components/chat/message-list.tsx`):
+   - Handles message list display
+   - Auto-scrolls to bottom on new messages
+   - Shows empty state when no messages
+   - Handles overflow with scrolling
+
+3. Updated InvoiceChat Component:
+   - Added welcome message
+   - Integrated message display with file upload
+   - Added user feedback messages for uploads
+   - Improved error handling with chat messages
+   - Enhanced styling and layout
+
+The chat interface now provides:
+- Visual feedback for file uploads
+- Clear distinction between user and assistant messages
+- Markdown support for rich text formatting
+- Automatic scrolling to latest messages
+- Error handling with user-friendly messages
+
+Would you like me to:
+1. Add any additional features to the chat interface?
+2. Implement the AI processing integration for the uploaded invoices?
+3. Add any styling improvements or animations?
+
+---
+
+_**User**_
+
+I don't see the chat message box in the currently loaded website, can you integrate it please?
+
+---
+
+_**Assistant**_
+
+Let me help you integrate the chat interface into the website. First, let's check where we should add it:
+
+---
+
+<details>
+            <summary>Searched codebase "app page layout main content" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `app/(chat)/layout.tsx` | L1-9 |
+| `app/layout.tsx` | L16-72 |
+| `app/(chat)/layout.tsx` | L9-31 |
+| `app/layout.tsx` | L12-16 |
+| `components/ui/sheet.tsx` | L54-88 |
+| `components/ui/sidebar.tsx` | L165-221 |
+| `components/ui/sidebar.tsx` | L294-341 |
+| `components/app-sidebar.tsx` | L1-63 |
+| `app/layout.tsx` | L1-12 |
+| `components/ui/sheet.tsx` | L1-54 |
+| `blocks/text/client.tsx` | L58-99 |
+| `components/app-sidebar.tsx` | L63-67 |
+| `components/version-footer.tsx` | L19-49 |
+| `components/document-skeleton.tsx` | L1-21 |
+| `app/globals.css` | L1-61 |
+| `components/block.tsx` | L455-507 |
+| `components/document-preview.tsx` | L113-138 |
+| `components/document-preview.tsx` | L222-279 |
+| `app/globals.css` | L61-121 |
+| `components/chat.tsx` | L63-121 |
+| `components/document-preview.tsx` | L100-113 |
+| `components/document-skeleton.tsx` | L21-35 |
+| `app/(chat)/page.tsx` | L1-43 |
+| `components/block.tsx` | L261-318 |
+| `components/message.tsx` | L70-119 |
+
+</details>
+
+---
+
+Let me check the current page structure to see where we should integrate the chat interface:
+
+---
+
+<details>
+            <summary>Searched codebase "main page content route" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `components/ui/sheet.tsx` | L54-88 |
+| `app/(chat)/chat/[id]/page.tsx` | L1-60 |
+| `components/app-sidebar.tsx` | L1-63 |
+| `components/ui/sidebar.tsx` | L294-341 |
+| `components/version-footer.tsx` | L19-49 |
+| `components/version-footer.tsx` | L1-19 |
+| `components/ui/sidebar.tsx` | L165-221 |
+| `components/icons.tsx` | L247-266 |
+| `app/(chat)/page.tsx` | L1-43 |
+| `components/ui/sheet.tsx` | L1-54 |
+| `components/ui/dropdown-menu.tsx` | L41-75 |
+| `components/document-preview.tsx` | L222-279 |
+| `components/ui/sidebar.tsx` | L481-520 |
+| `app/layout.tsx` | L1-12 |
+| `components/overview.tsx` | L1-52 |
+| `components/markdown.tsx` | L1-79 |
+| `components/block.tsx` | L455-507 |
+| `app/layout.tsx` | L16-72 |
+| `components/theme-provider.tsx` | L1-8 |
+| `lib/editor/functions.tsx` | L1-19 |
+| `app/(chat)/layout.tsx` | L1-9 |
+| `blocks/text/client.tsx` | L58-99 |
+| `components/editor.tsx` | L1-33 |
+| `app/(chat)/api/document/route.ts` | L36-70 |
+| `components/chat-header.tsx` | L1-69 |
+
+</details>
+
+---
+
+I see that the chat interface is already implemented in the codebase, but it's not being displayed on the main page. Let me check the main page route to see how we can integrate it:
+
+---
+
+Could not find file 'app/page.tsx'. Did you mean one of:
+- app/(chat)/page.tsx
+- app/(chat)/chat/[id]/page.tsx
+
+---
+
+Let me check the chat page route:
+
+---
+
+Read file: app/(chat)/page.tsx
+
+---
+
+Let me check the layout file to understand the page structure:
+
+---
+
+Read file: app/(chat)/layout.tsx
+
+---
+
+Let me check the Chat component to understand its implementation:
+
+---
+
+Read file: components/chat.tsx
+
+---
+
+I see that the chat interface is already implemented and should be working. The issue might be with the routing. Let me check if there are any issues with the route configuration:
+
+---
+
+<details>
+            <summary>Listed directory app • **5** results</summary>
+        
+| Name |
+|-------|
+| 📄 `favicon.ico` |
+| 📄 `globals.css` |
+| 📄 `layout.tsx` |
+| 📁 `(chat)` |
+| 📁 `(auth)` |
+
+</details>
+
+---
+
+Let me check the root layout file:
+
+---
+
+Read file: app/layout.tsx
+
+---
+
+The chat interface should be working correctly based on the code. Let me check if there are any issues with the routing configuration:
+
+---
+
+<details>
+            <summary>Listed directory app/(chat) • **7** results</summary>
+        
+| Name |
+|-------|
+| 📄 `twitter-image.png` |
+| 📄 `opengraph-image.png` |
+| 📄 `page.tsx` |
+| 📁 `api` |
+| 📁 `chat` |
+| 📄 `layout.tsx` |
+| 📄 `actions.ts` |
+
+</details>
+
+---
+
+The routing setup looks correct. The chat interface should be accessible at the root path ('/') since it's in the `app/(chat)/page.tsx` file. Let me check if there are any issues with the navigation:
+
+---
+
 Cancelled
 
 ---

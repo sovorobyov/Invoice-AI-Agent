@@ -10,7 +10,18 @@ This project aims to build an AI-powered invoice processing system.  The system 
 Follow TypeScript best practices. Maintain clean code structure.  Adhere to the established ESLint rules defined in `.eslintrc.json`.
 
 ## FOLDER ORGANIZATION
-The project follows a structured folder organization as detailed in the project structure provided.  This includes separation of components, blocks, hooks, and libraries.  The `lib/db/schema` folder now contains separate files for each domain's schema definitions for improved readability.
+The project follows a structured folder organization as detailed in the project structure provided.  This includes separation of components, blocks, hooks, and libraries.  The `lib/db/schema` folder now contains separate files for each domain's schema definitions for improved readability.  The new folder structure for `lib/db/schema` is as follows:
+```
+lib/db/schema/
+├── chat.ts        (chat and message tables)
+├── document.ts    (document table)
+├── suggestion.ts  (suggestion table)
+├── invoice.ts     (invoice table)
+├── line-item.ts   (line items table)
+├── token-usage.ts (token usage table)
+├── types.ts       (shared types)
+└── index.ts       (main export file)
+```
 
 ## TECH STACK
 - Frontend: Next.js 14+, Shadcn, Tailwind CSS, React hooks, PDF.js
@@ -18,7 +29,7 @@ The project follows a structured folder organization as detailed in the project 
 - Database: SQLite with Drizzle ORM
 - AI: Claude 3.5 Sonnet, OpenAI GPT-4, Vercel AI SDK
 - Package Manager: pnpm
-- Other Libraries:  @ai-sdk/fireworks, @ai-sdk/openai, @codemirror/lang-javascript, @codemirror/lang-python, @codemirror/state, @codemirror/theme-one-dark, @codemirror/view, @radix-ui/react-alert-dialog, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-icons, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-separator, @radix-ui/react-slot, @radix-ui/react-tooltip, @radix-ui/react-visually-hidden, ai, bcrypt-ts, better-sqlite3, class-variance-authority, classnames, clsx, codemirror, date-fns, diff-match-patch, dotenv, drizzle-orm, fast-deep-equal, framer-motion, geist, lucide-react, nanoid, next, next-auth, next-themes, orderedmap, papaparse, prosemirror-example-setup, prosemirror-inputrules, prosemirror-markdown, prosemirror-model, prosemirror-schema-basic, prosemirror-schema-list, prosemirror-state, prosemirror-view, react, react-data-grid, react-dom, react-markdown, react-resizable-panels, remark-gfm, server-only, sonner, swr, tailwind-merge, tailwindcss-animate, usehooks-ts, zod, @biomejs/biome, @tailwindcss/typography, @types/better-sqlite3, @types/d3-scale, @types/node, @types/papaparse, @types/pdf-parse, @types/react, @types/react-dom, drizzle-kit, eslint, eslint-config-next, eslint-config-prettier, eslint-import-resolver-typescript, eslint-plugin-tailwindcss, postcss, tailwindcss, tsx, typescript, sonner
+- Other Libraries:  @ai-sdk/fireworks, @ai-sdk/openai, @codemirror/lang-javascript, @codemirror/lang-python, @codemirror/state, @codemirror/theme-one-dark, @codemirror/view, @radix-ui/react-alert-dialog, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-icons, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-separator, @radix-ui/react-slot, @radix-ui/react-tooltip, @radix-ui/react-visually-hidden, ai, bcrypt-ts, better-sqlite3, class-variance-authority, classnames, clsx, codemirror, date-fns, diff-match-patch, dotenv, drizzle-orm, fast-deep-equal, framer-motion, geist, lucide-react, nanoid, next, next-auth, next-themes, orderedmap, papaparse, prosemirror-example-setup, prosemirror-inputrules, prosemirror-markdown, prosemirror-model, prosemirror-schema-basic, prosemirror-schema-list, prosemirror-state, prosemirror-view, react, react-data-grid, react-dom, react-markdown, react-resizable-panels, remark-gfm, server-only, sonner, swr, tailwind-merge, tailwindcss-animate, usehooks-ts, zod, @biomejs/biome, @tailwindcss/typography, @types/better-sqlite3, @types/d3-scale, @types/node, @types/papaparse, @types/pdf-parse, @types/react, @types/react-dom, drizzle-kit, eslint, eslint-config-next, eslint-config-prettier, eslint-import-resolver-typescript, eslint-plugin-tailwindcss, postcss, tailwindcss, tsx, typescript, sonner, @radix-ui/react-progress, shadcn, react-markdown, @radix-ui/react-progress
 
 
 ## PROJECT-SPECIFIC STANDARDS
@@ -34,6 +45,7 @@ The project follows a structured folder organization as detailed in the project 
 - As of 2025-03-30,  `pnpm db:migrate` is the correct command for database migrations.  The previous `pnpm migrate` command is deprecated.
 - If `pnpm install` fails due to missing build tools, ensure Xcode Command Line Tools are installed using `xcode-select -p`. Then, run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` for `better-sqlite3`.
 -  If `npm` command is not found, Node.js and npm need to be installed.  On macOS, use Homebrew.
+- If `npm` command is not found, Node.js and npm need to be installed. On macOS, use Homebrew.
 
 
 ## REFERENCE EXAMPLES
@@ -46,6 +58,7 @@ Documentation is maintained in the `docs` folder using markdown files (e.g., `01
 - For debugging `better-sqlite3` issues on macOS with Apple Silicon, ensure Xcode Command Line Tools are installed (`xcode-select -p`), then run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` to approve the build for `better-sqlite3`.
 - As of 2025-03-30, if `pnpm install` fails due to missing build tools, ensure Xcode Command Line Tools are installed using `xcode-select -p`. Then, run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` for `better-sqlite3`.
 - To debug missing `npm` command, ensure Node.js and npm are installed. On macOS, use Homebrew.
+- If `npm` command is not found, install Node.js and npm. On macOS, use Homebrew.
 
 ## FINAL DOs AND DON'Ts
 - **DO** follow the established code style and folder organization.
