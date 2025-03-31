@@ -141,6 +141,12 @@ function PureMultimodalInput({
     setAttachments((currentAttachments) => [...currentAttachments, ...newAttachments]);
   }, [setAttachments]);
 
+  const handleFileDelete = useCallback((attachmentToDelete: Attachment) => {
+    setAttachments((currentAttachments) => 
+      currentAttachments.filter((attachment) => attachment.url !== attachmentToDelete.url)
+    );
+  }, [setAttachments]);
+
   return (
     <div className="relative w-full flex flex-col gap-4">
       {messages.length === 0 && attachments.length === 0 && (
@@ -153,7 +159,11 @@ function PureMultimodalInput({
       {attachments.length > 0 && (
         <div className="flex flex-row gap-2 overflow-x-scroll items-end">
           {attachments.map((attachment) => (
-            <PreviewAttachment key={attachment.url} attachment={attachment} />
+            <PreviewAttachment 
+              key={attachment.url} 
+              attachment={attachment}
+              onDelete={() => handleFileDelete(attachment)}
+            />
           ))}
         </div>
       )}
