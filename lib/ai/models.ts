@@ -34,7 +34,7 @@ interface ChatModel {
 export const chatModels: Array<ChatModel> = [
   {
     id: 'chat-model-large',
-    name: 'Large model',
-    description: 'Large model for complex, multi-step tasks',
+    name: 'Invoice Processing Model',
+    description: 'GPT-4o for invoice processing and data extraction',
   },
 ];
