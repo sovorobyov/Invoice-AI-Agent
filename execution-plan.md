@@ -73,19 +73,21 @@ This document outlines the implementation plan for building an AI-powered invoic
 
 ### Phase 2: Core Infrastructure (2-3 hours)
 1. **File Upload System**
-   - Leverage existing drag-and-drop component
+   - Extend the existing file upload component by converting it into a drag and drop area / click for upload above the chat box area
    - Update file validation rules:
      - Supported formats: PDF, PNG, JPG
      - Max file size: 10MB
      - File type verification
-   - Enhance error handling and user feedback
+     - Only one file can be uploaded
+   - Ensure proper error handling and notification to user on issues
    - Integrate with current upload flow
 
 2. **Chat Interface**
    - Extend existing Shadcn chat UI
    - Add invoice-specific message types
-   - Enhance file preview integration
+   - Enhance file preview integration to support PDF
    - Improve message threading for invoice context
+   - Allow for deleting uploaded file
 
 3. **AI Integration**
    - Leverage existing AI integration infrastructure
