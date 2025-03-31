@@ -22,16 +22,17 @@ export function FileUploadZone({ onFileUpload, className }: FileUploadZoneProps)
         body: formData,
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
         const { url, pathname, contentType } = data;
         return { url, name: pathname, contentType };
       }
       
-      const { error } = await response.json();
-      toast.error(error);
+      toast.error(data.error || 'Failed to upload file');
       return null;
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error('Failed to upload file, please try again!');
       return null;
     }

@@ -4,7 +4,7 @@ globs: *
 ---
 
 ## PROJECT OVERVIEW
-This project aims to build an AI-powered invoice processing system.  The system will allow company admins to upload vendor invoices and automatically extract, validate, and manage invoice information.  A conversational interface will enhance user interaction.  The system should support drag-and-drop file uploads anywhere on the webpage. This functionality has been implemented as of 2025-03-30.
+This project aims to build an AI-powered invoice processing system.  The system will allow company admins to upload vendor invoices and automatically extract, validate, and manage invoice information.  A conversational interface will enhance user interaction.  The system should support drag-and-drop file uploads anywhere on the webpage. This functionality has been implemented as of 2025-03-30.  The system now stores uploaded files in the `public/uploads` directory. (Added 2025-04-01)
 
 ## CODE STYLE
 Follow TypeScript best practices. Maintain clean code structure.  Adhere to the established ESLint rules defined in `.eslintrc.json`.
@@ -22,6 +22,7 @@ lib/db/schema/
 ├── types.ts       (shared types)
 └── index.ts       (main export file)
 ```
+A new `public/uploads` directory has been created to store uploaded invoice files. (Added 2025-04-01)
 
 ## TECH STACK
 - Frontend: Next.js 14+, Shadcn, Tailwind CSS, React hooks, PDF.js
@@ -29,12 +30,12 @@ lib/db/schema/
 - Database: SQLite with Drizzle ORM
 - AI: Claude 3.5 Sonnet, OpenAI GPT-4, Vercel AI SDK
 - Package Manager: pnpm
-- Other Libraries:  @ai-sdk/fireworks, @ai-sdk/openai, @codemirror/lang-javascript, @codemirror/lang-python, @codemirror/state, @codemirror/theme-one-dark, @codemirror/view, @radix-ui/react-alert-dialog, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-icons, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-separator, @radix-ui/react-slot, @radix-ui/react-tooltip, @radix-ui/react-visually-hidden, ai, bcrypt-ts, better-sqlite3, class-variance-authority, classnames, clsx, codemirror, date-fns, diff-match-patch, dotenv, drizzle-orm, fast-deep-equal, framer-motion, geist, lucide-react, nanoid, next, next-auth, next-themes, orderedmap, papaparse, prosemirror-example-setup, prosemirror-inputrules, prosemirror-markdown, prosemirror-model, prosemirror-schema-basic, prosemirror-schema-list, prosemirror-state, prosemirror-view, react, react-data-grid, react-dom, react-markdown, react-resizable-panels, remark-gfm, server-only, sonner, swr, tailwind-merge, tailwindcss-animate, usehooks-ts, zod, @biomejs/biome, @tailwindcss/typography, @types/better-sqlite3, @types/d3-scale, @types/node, @types/papaparse, @types/pdf-parse, @types/react, @types/react-dom, drizzle-kit, eslint, eslint-config-next, eslint-config-prettier, eslint-import-resolver-typescript, eslint-plugin-tailwindcss, postcss, tailwindcss, tsx, typescript, sonner, @radix-ui/react-progress, shadcn, react-markdown, @radix-ui/react-progress, sonner, sonner
+- Other Libraries:  @ai-sdk/fireworks, @ai-sdk/openai, @ai-sdk/anthropic, @codemirror/lang-javascript, @codemirror/lang-python, @codemirror/state, @codemirror/theme-one-dark, @codemirror/view, @radix-ui/react-alert-dialog, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-icons, @radix-ui/react-label, @radix-ui/react-select, @radix-ui/react-separator, @radix-ui/react-slot, @radix-ui/react-tooltip, @radix-ui/react-visually-hidden, ai, bcrypt-ts, better-sqlite3, class-variance-authority, classnames, clsx, codemirror, date-fns, diff-match-patch, dotenv, drizzle-orm, fast-deep-equal, framer-motion, geist, lucide-react, nanoid, next, next-auth, next-themes, orderedmap, papaparse, prosemirror-example-setup, prosemirror-inputrules, prosemirror-markdown, prosemirror-model, prosemirror-schema-basic, prosemirror-schema-list, prosemirror-state, prosemirror-view, react, react-data-grid, react-dom, react-markdown, react-resizable-panels, remark-gfm, server-only, sonner, swr, tailwind-merge, tailwindcss-animate, usehooks-ts, zod, @biomejs/biome, @tailwindcss/typography, @types/better-sqlite3, @types/d3-scale, @types/node, @types/papaparse, @types/pdf-parse, @types/react, @types/react-dom, drizzle-kit, eslint, eslint-config-next, eslint-config-prettier, eslint-import-resolver-typescript, eslint-plugin-tailwindcss, postcss, tailwindcss, tsx, typescript, sonner, @radix-ui/react-progress, shadcn, fs/promises, path, pdf-parse
 
 
 ## PROJECT-SPECIFIC STANDARDS
 -  All invoices must be validated before processing.
--  Duplicate invoice detection must be implemented using fuzzy matching and confidence scoring.
+-  Duplicate invoice detection must be implemented using fuzzy matching and confidence scoring.  Duplicate detection will be handled by database checks after AI parsing. (Added 2025-04-01)
 -  Token usage should be tracked and optimized.
 -  File upload should only accept PDFs and images. (Added 2025-03-31)
 - Only one file can be uploaded at a time. (Added 2025-03-31)
@@ -51,6 +52,7 @@ lib/db/schema/
 - Phase 2 implementation plan added 2025-03-31 (See `2025-03-31_02-21-review-of-phase-2-plan.md`)
 - Phase 2 plan includes: File Upload System Enhancement, Chat Interface Expansion, AI Integration Setup, and Testing and Quality Assurance.  (Added 2025-03-31)
 - Phase 2 plan updated 2025-03-31: File upload component will be converted to a drag-and-drop area/click-to-upload above the chat box. (Added 2025-03-31)
+- Phase 2.3 updated 2025-04-01: Includes updating AI model configuration, creating invoice-specific prompt templates, configuring streaming response handlers, and adding invoice-specific context management.  Duplicate detection removed from prompts; handled via database checks. (Added 2025-04-01)
 
 
 ## REFERENCE EXAMPLES
@@ -63,7 +65,11 @@ Documentation is maintained in the `docs` folder using markdown files (e.g., `01
 - For debugging `better-sqlite3` issues on macOS with Apple Silicon, ensure Xcode Command Line Tools are installed (`xcode-select -p`), then run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` to approve the build for `better-sqlite3`.
 - As of 2025-03-30, if `pnpm install` fails due to missing build tools, ensure Xcode Command Line Tools are installed using `xcode-select -p`. Then, run `rm -rf node_modules && pnpm install` followed by `pnpm approve-builds` for `better-sqlite3`.
 - To debug missing `npm` command, ensure Node.js and npm are installed. On macOS, use Homebrew.
-- If `npm` command is not found, install Node.js and npm. On macOS, use Homebrew.
+- If `npm` command is not found, install Node.js and npm. On macOS, use Homebrew.  Add detailed logging to the server-side code for improved debugging. (Added 2025-04-01)
+- Implement robust logging throughout the application to aid in debugging. (Added 2025-04-07)
+- Implement robust error handling and logging for the file upload API route to provide detailed error messages and logs for debugging purposes. (Added 2025-04-07)
+- Implement robust error handling in the chat route and AI interactions for better visibility into errors. Include detailed error logging and improved error handling for the AI stream processing. (Added 2025-04-07)
+- Implement robust error handling in the chat route and AI interactions, including detailed error logging and improved error handling for AI stream processing. (Added 2025-04-08)
 
 ## FINAL DOs AND DON'Ts
 - **DO** follow the established code style and folder organization.
@@ -84,3 +90,25 @@ Documentation is maintained in the `docs` folder using markdown files (e.g., `01
 - **DO** Use appropriate z-index values to prevent UI element overlap, especially for the delete button in the file preview component. (Added 2025-04-01)
 - **DO** Add padding to parent containers to prevent cutoff issues with absolutely positioned elements. (Added 2025-04-01)
 - **DO** Add a `DialogTitle` to the `PreviewDialog` component for screen reader accessibility. (Added 2025-04-01)
+- **DO** Add padding to parent containers to prevent cutoff issues with absolutely positioned elements. (Added 2025-04-01)
+- **DO** Implement robust error handling and logging throughout the application, including the file upload, chat processing, and invoice processing stages. (Added 2025-04-01)
+- **DO** Implement proper file storage and retrieval mechanisms for uploaded invoice documents. (Added 2025-04-01)
+- **DO** Store uploaded files in the `public/uploads` directory. (Added 2025-04-01)
+- **DO** Implement a robust error handling system that provides detailed logs and user-friendly error messages. (Added 2025-04-01)
+- **DO** Ensure that the file upload endpoint correctly stores the uploaded files permanently, rather than just creating data URLs for preview. (Added 2025-04-01)
+- **DO** Use the actual file URL when processing invoices, instead of trying to include the file content in the AI message. (Added 2025-04-01)
+- **DO** Implement robust logging throughout the application to aid in debugging. (Added 2025-04-07)
+- **DO** Implement robust error handling and logging for the file upload API route to provide detailed error messages and logs for debugging purposes. (Added 2025-04-07)
+- **DO** Implement robust error handling in the chat route and AI interactions for better visibility into errors. Include detailed error logging and improved error handling for the AI stream processing. (Added 2025-04-07)
+- **DO** Implement robust error handling in the chat route and AI interactions, including detailed error logging and improved error handling for AI stream processing. (Added 2025-04-08)
+- **DO** Ensure that the file upload endpoint correctly stores the uploaded files permanently, rather than just creating data URLs for preview. (Added 2025-04-08)
+- **DO** Use the actual file path when processing invoices, instead of trying to include the file content in the AI message. (Added 2025-04-08)
+- **DO** Implement robust error handling and logging for file uploads, including detailed error messages and logs. (Added 2025-04-29)
+- **DO** Implement robust error handling and logging for chat processing, including detailed logs and improved error handling for AI stream processing. (Added 2025-04-29)
+- **DO** Ensure that file paths are constructed correctly to prevent 404 errors. (Added 2025-04-29)
+- **DO** Ensure that the file upload endpoint correctly stores the uploaded files permanently, rather than just creating data URLs for preview. (Added 2025-04-29)
+- **DO** Use the actual file path when processing invoices, instead of trying to include the file content in the AI message. (Added 2025-04-29)
+- **DO** Implement robust error handling for OpenAI SDK functionality errors, providing user-friendly messages and detailed logs. (Added 2025-05-06)
+- **DO** Ensure that the file paths used for invoice processing are constructed correctly to prevent 404 errors. (Added 2025-05-06)
+- **DO** Ensure that the file paths used for invoice processing are constructed correctly to prevent 404 errors. (Added 2025-05-06)
+- **DO** Ensure that the file paths used for invoice processing are constructed correctly. (Added 2025-05-06)
