@@ -1,5 +1,6 @@
 import { openai } from '@ai-sdk/openai';
 import { fireworks } from '@ai-sdk/fireworks';
+import { anthropic } from '@ai-sdk/anthropic';
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -12,6 +13,7 @@ export const myProvider = customProvider({
   languageModels: {
     'chat-model-small': openai('gpt-4o-mini'),
     'chat-model-large': openai('gpt-4o'),
+    'claude-3.5-sonnet': anthropic('claude-3-5-sonnet-20240620'),
     'chat-model-reasoning': wrapLanguageModel({
       model: fireworks('accounts/fireworks/models/deepseek-r1'),
       middleware: extractReasoningMiddleware({ tagName: 'think' }),
@@ -33,8 +35,13 @@ interface ChatModel {
 
 export const chatModels: Array<ChatModel> = [
   {
+    id: 'claude-3.5-sonnet',
+    name: 'Claude 3.5 Sonnet',
+    description: 'Primary model for invoice processing',
+  },
+  {
     id: 'chat-model-large',
-    name: 'Large model',
+    name: 'GPT-4o',
     description: 'Large model for complex, multi-step tasks',
   },
 ];

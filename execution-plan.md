@@ -29,7 +29,7 @@ This document outlines the implementation plan for building an AI-powered invoic
      invoice_date DATE,
      due_date DATE,
      amount DECIMAL,
-     status TEXT CHECK(status IN ('uploaded', 'error', 'processed', 'paid')),
+     status TEXT CHECK(status IN ('UPLOADED', 'ERROR', 'PROCESSED', 'PAID')),
      created_at TIMESTAMP,
      updated_at TIMESTAMP
    );
