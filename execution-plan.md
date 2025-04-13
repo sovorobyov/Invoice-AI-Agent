@@ -76,24 +76,20 @@ This document outlines the implementation plan for building an AI-powered invoic
    - Remove the AI writing suggestion functionality (likely involving components in `lib/editor`, `lib/ai/tools/request-suggestions.ts`, and related UI elements) as it's not relevant for invoice processing.
 
 ### Phase 2: Core Infrastructure (2-3 hours)
-1. **File Upload System**
-   - Extend the existing file upload component by adding an ability to drag and drop the file anywhere in the chat window for upload
-   - Update file validation rules:
-     - Supported formats: PDF, PNG, JPG
-     - Max file size: 10MB
-     - File type verification
-     - Only one file can be uploaded
-   - Ensure proper error handling and notification to user on issues
-   - Integrate with current upload flow
+1. **File Upload & Preview System**
+   - Implement application-wide drag-and-drop functionality.
+   - Update file validation rules (Client-side: PDF/PNG/JPG, <= 10MB, single file).
+   - Enhance visual feedback for drag-over state.
+   - Ensure proper error handling and user notification (via toast) for validation failures.
+   - Enhance attachment preview:
+     - Add a button to remove the selected attachment before sending.
+     - Implement modal dialog for previewing attachments.
+     - Display image previews directly in the modal.
+     - Render PDF previews inline within the modal using `react-pdf`.
+     - Provide PDF thumbnail rendering in the initial preview area.
+   - Address backend API validation to accept PDF, PNG, JPG files up to 10MB.
 
-2. **Chat Interface**
-   - Extend existing Shadcn chat UI
-   - Add invoice-specific message types
-   - Enhance file preview integration to support PDF
-   - Improve message threading for invoice context
-   - Allow for deleting uploaded file
-
-3. **AI Integration**
+2. **AI Integration**
    - Configure AI Model:
      - Use Claude 3.5 Sonnet model for invoice processing
      - Set up proper system prompts and context

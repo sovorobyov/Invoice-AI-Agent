@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 import { ThemeProvider } from '@/components/theme-provider';
+import { PdfWorkerConfig } from '@/components/pdf-worker-config';
 
 import './globals.css';
 
@@ -63,8 +64,10 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster position="top-center" />
-          {children}
+          <PdfWorkerConfig>
+            <Toaster position="top-center" />
+            {children}
+          </PdfWorkerConfig>
         </ThemeProvider>
       </body>
     </html>

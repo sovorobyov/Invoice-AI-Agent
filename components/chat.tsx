@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 
 import { Button } from './ui/button';
 import { PaperclipIcon } from './icons';
+import { PreviewAttachment } from './preview-attachment';
 
 export function Chat({
   id,
@@ -173,6 +174,10 @@ export function Chat({
     [handleFiles],
   );
 
+  const removeAttachment = useCallback((urlToRemove: string) => {
+    setAttachments((prev) => prev.filter(att => att.url !== urlToRemove));
+  }, [setAttachments]);
+
   return (
     <>
       <div
@@ -216,6 +221,31 @@ export function Chat({
                 <PaperclipIcon size={14} />
               </Button>
             </div>
+
+            {/* Render Attachment Previews */}
+            {(attachments.length > 0 || uploadQueue.length > 0) && (
+              <div className="flex flex-row gap-2 overflow-x-scroll items-end mb-2">
+                {attachments.map((attachment) => (
+                  <PreviewAttachment
+                    key={attachment.url}
+                    attachment={attachment}
+                    onRemove={() => removeAttachment(attachment.url)}
+                  />
+                ))}
+
+                {uploadQueue.map((filename) => (
+                  <PreviewAttachment
+                    key={filename}
+                    attachment={{
+                      url: '',
+                      name: filename,
+                      contentType: '',
+                    }}
+                    isUploading={true}
+                  />
+                ))}
+              </div>
+            )}
 
             <MultimodalInput
               input={input}
