@@ -23,8 +23,13 @@ import {
 import { generateTitleFromUserMessage } from '../../actions';
 import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
-import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
+
+// Import Invoice Processing Tools
+import { validateInvoice } from '@/lib/ai/invoice-tools/validate-invoice';
+import { extractInvoiceData } from '@/lib/ai/invoice-tools/extract-invoice-data';
+import { saveInvoiceToDb } from '@/lib/ai/invoice-tools/save-invoice-to-db';
+import { summarizeInvoiceData } from '@/lib/ai/invoice-tools/summarize-invoice-data';
 
 export const maxDuration = 60;
 
@@ -73,7 +78,10 @@ export async function POST(request: Request) {
                 'getWeather',
                 'createDocument',
                 'updateDocument',
-                'requestSuggestions',
+                'validateInvoice',
+                'extractInvoiceData',
+                'saveInvoiceToDb',
+                'summarizeInvoiceData',
               ],
         experimental_transform: smoothStream({ chunking: 'word' }),
         experimental_generateMessageId: generateUUID,
@@ -81,10 +89,10 @@ export async function POST(request: Request) {
           getWeather,
           createDocument: createDocument({ session, dataStream }),
           updateDocument: updateDocument({ session, dataStream }),
-          requestSuggestions: requestSuggestions({
-            session,
-            dataStream,
-          }),
+          validateInvoice,
+          extractInvoiceData,
+          saveInvoiceToDb,
+          summarizeInvoiceData,
         },
         onFinish: async ({ response, reasoning }) => {
           if (session.user?.id) {
