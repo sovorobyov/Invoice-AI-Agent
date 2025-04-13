@@ -77,7 +77,7 @@ This document outlines the implementation plan for building an AI-powered invoic
 
 ### Phase 2: Core Infrastructure (2-3 hours)
 1. **File Upload System**
-   - Extend the existing file upload component by adding an ability to drag and drop the file into the chat window for upload
+   - Extend the existing file upload component by adding an ability to drag and drop the file anywhere in the chat window for upload
    - Update file validation rules:
      - Supported formats: PDF, PNG, JPG
      - Max file size: 10MB
@@ -270,6 +270,9 @@ This document outlines the implementation plan for building an AI-powered invoic
    - Robust error handling
    - Performance monitoring
    - Regular backups
+
+## Future Enhancements
+1.  **Optimize File Handling:** Modify the `/api/files/upload` endpoint to save uploaded files directly to the local filesystem (e.g., in a dedicated `/uploads` directory) or cloud storage (e.g., S3, GCS, Azure Blob Storage) instead of returning a base64 data URL. This avoids significant size increases and memory issues associated with data URLs. Create a corresponding tool (e.g., `readFileFromPath`) that the AI agent can use to retrieve the file content from its stored path when needed for processing.
 
 ## Next Steps
 1. Review and approve execution plan
