@@ -1,0 +1,38 @@
+---
+description: Cursor rules derived by SpecStory from the project AI interaction history
+globs: *
+---
+
+## PROJECT OVERVIEW
+This project aims to build an invoice processing system.  The system will incorporate AI for automated data extraction and validation.  The project will utilize an existing codebase where possible.
+
+## CODE STYLE
+Consistent indentation (4 spaces).  Follow PEP 8 guidelines where applicable.
+
+## FOLDER ORGANIZATION
+To be defined based on project growth.  A proposal should be made and confirmed before implementation.
+
+## TECH STACK
+Python (Specify version),  PostgreSQL (Specify version),  React (Specify version),  GPT-4, Claude 3.5 Sonnet, OpenAI GPT-4, Vercel AI SDK.  Claude 3.5 Sonnet is the primary model for invoice processing. Further clarification needed on the AI model to be used in Phase 2.
+
+## PROJECT-SPECIFIC STANDARDS
+All code changes require confirmation before implementation.  Database schema changes require explicit confirmation.  The `requirements.txt` file (or a separate requirements document if one exists) should be consulted for dependencies.
+
+## WORKFLOW & RELEASE RULES
+Confirmation checkpoints should be added at the end of each major phase or feature implementation. A final review step is already in place.  However, for this project, continuous confirmation during execution is not required.
+
+## REFERENCE EXAMPLES
+N/A
+
+## PROJECT DOCUMENTATION & CONTEXT SYSTEM
+`execution-plan.md` outlines the project phases and timelines. A separate requirements document (`requirements.txt`) should be consulted and the execution plan should ensure it fulfills all requirements.
+
+## DEBUGGING
+Standard debugging practices should be followed. Specific debugging strategies will be addressed as needed.  Stream text updates to the user should be implemented to provide real-time feedback during invoice processing.
+
+## FINAL DOs AND DON'Ts
+- **DO:** Always confirm code changes before implementation.
+- **DO:** Refer to the `execution-plan.md` (and `requirements.txt` if applicable) for guidance.
+- **DO:** Add a `status` column (with values: 'uploaded', 'error', 'processed', 'paid'), an `error_message` column, a `file_path` or `storage_key`, and a `confidence_score` column to the `invoices` table in the database.
+- **DON'T:** Remove suggestion boxes from the UI without clear context and confirmation of their location.  Remove the AI writing suggestion functionality (likely involving components in `lib/editor`, `lib/ai/tools/request-suggestions.ts`, and related UI elements) as it's not relevant for invoice processing.
+- **DON'T** proceed with AI model integration in Phase 2 without clarifying which model(s) will be primarily used (GPT-4o, Claude 3.5 Sonnet, or OpenAI GPT-4).  Use Claude 3.5 Sonnet as the primary model for invoice processing.

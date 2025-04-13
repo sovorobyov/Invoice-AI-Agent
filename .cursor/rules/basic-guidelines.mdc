@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## My Preferences
+- Before recommending any changes, always layout the plan for the next step to be taken via a MECE task breakdown
+- Please refer back to [requirements.txt](mdc:requirements.txt) and [execution-plan.md](mdc:execution-plan.md) for understanding the context in which you are executing
+- Make sure to take into account the existing code base when introducing functionality, never duplicate existing functionality
+- Never leave files with incomplete code, please ensure your recommendations are complete
+- Please stop to get confirmation after each code change recommendation so I can ask follow up questions or make adjustments
+
+## How to approach making code changes
+- **DO** Read relevant code sections and provide an analysis of the intended changes, do not make any changes without my confirmation
+- **DO** Preserve existing functionality
+- **DO** Maintain type safety
+- **DO** Treat your project as a real production system, sharing terminal outputs and logs for iterative improvement
+- **DO** Code changes should be well documented
+- **DO** Resolve lint errors immediately
+- **DO** remove any unused code to ensure no code duplication remains related to the code changes
+- **DON'T** make any changes that are not relevant for the given instruction

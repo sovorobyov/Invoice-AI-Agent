@@ -4,6 +4,7 @@
 node_modules
 .pnp
 .pnp.js
+pnpm-workspace.yaml
 
 # testing
 coverage
@@ -39,3 +40,6 @@ yarn-error.log*
 
 .idea
 sqlite.db
+
+# specstory
+.specstory
