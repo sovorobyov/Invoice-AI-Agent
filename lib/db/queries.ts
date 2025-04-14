@@ -1,7 +1,6 @@
 import 'server-only';
 import { and, asc, desc, eq, gt, gte, inArray } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+import { db } from '.';
 
 import {
   chat,
@@ -17,10 +16,6 @@ import type { BlockKind } from '@/components/block';
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
 // https://authjs.dev/reference/adapter/drizzle
-
-// biome-ignore lint: Forbidden non-null assertion.
-const sqlite = new Database('sqlite.db');
-const db = drizzle(sqlite);
 
 export async function saveChat({
   id,

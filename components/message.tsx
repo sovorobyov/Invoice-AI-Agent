@@ -113,7 +113,9 @@ const PurePreviewMessage = ({
                       message.role === 'user',
                   })}
                 >
-                  <Markdown>{message.content as string}</Markdown>
+                  {typeof message.content === 'string' ? (
+                    <Markdown>{message.content}</Markdown>
+                  ) : null}
                 </div>
               </div>
             )}
@@ -162,7 +164,8 @@ const PurePreviewMessage = ({
                             isReadonly={isReadonly}
                           />
                         ) : (
-                          <pre>{JSON.stringify(result, null, 2)}</pre>
+                          // Don't render result for unknown/unhandled tools
+                          null
                         )}
                       </div>
                     );

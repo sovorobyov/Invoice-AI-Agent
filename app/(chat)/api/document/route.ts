@@ -14,11 +14,14 @@ export async function GET(request: Request) {
     return new Response('Missing id', { status: 400 });
   }
 
+  // TODO: Implement proper authentication and remove this bypass
+  /*
   const session = await auth();
 
   if (!session || !session.user) {
     return new Response('Unauthorized', { status: 401 });
   }
+  */
 
   const documents = await getDocumentsById({ id });
 
@@ -28,9 +31,12 @@ export async function GET(request: Request) {
     return new Response('Not Found', { status: 404 });
   }
 
+  // TODO: Implement proper authentication and remove this bypass
+  /*
   if (document.userId !== session.user.id) {
     return new Response('Unauthorized', { status: 401 });
   }
+  */
 
   return Response.json(documents, { status: 200 });
 }

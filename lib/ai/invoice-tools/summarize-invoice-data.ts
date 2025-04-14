@@ -12,15 +12,13 @@ export const summarizeInvoiceData = tool({
   }),
   execute: async ({ invoiceId }) => {
     console.log(`[Tool Call] summarizeInvoiceData for ID: ${invoiceId}`);
-    // --- STUB --- 
-    // In a real implementation:
-    // 1. Could fetch data from DB using invoiceId (if not passed in parameters).
-    // 2. Format a user-friendly summary message.
-    // Simulate streaming update
-    // dataStream?.appendMessageAnnotation({ tool_call_id, type: 'tool_status', status: 'running', data: 'Summarizing results...' });
-    return { 
-        summary: `Successfully processed and saved invoice (ID: ${invoiceId}). Vendor: Placeholder Vendor, Amount: $123.45 (stub).`
-    };
-    // --- END STUB ---
+
+    // TODO: Optionally fetch saved data using invoiceId for a more detailed summary
+
+    const summaryMessage = `Successfully processed and saved invoice with ID: ${invoiceId}. You can view it in the invoice management table.`;
+
+    // dataStream?.appendMessageAnnotation({ tool_call_id, type: 'tool_status', status: 'complete', data: summaryMessage });
+
+    return { summary: summaryMessage };
   },
 }); 

@@ -15,20 +15,23 @@ export const validateInvoice = tool({
   }),
   execute: async ({ attachment }) => {
     console.log(`[Tool Call] validateInvoice for: ${attachment.name}`)
-    // --- STUB --- 
-    // In a real implementation:
-    // 1. Access file content (need to adapt based on storage: data URL vs. path)
-    // 2. Use heuristics, regex, or another lightweight check to determine if it's an invoice.
-    // 3. Return validation result.
-    const isValid = true; // Placeholder
-    const message = isValid ? 'File appears to be a valid invoice.' : 'File does not appear to be a valid invoice.';
-    // Simulate streaming update
-    // dataStream?.appendMessageAnnotation({ tool_call_id, type: 'tool_status', status: 'running', data: 'Validating document type...' });
-    // dataStream?.appendMessageAnnotation({ tool_call_id, type: 'tool_status', status: 'complete', data: message });
+    // --- Basic Content Type Validation --- 
+    const supportedTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+    let isValid = false;
+    let message = `File type (${attachment.contentType || 'unknown'}) is not supported for invoices.`;
+
+    if (attachment.contentType && supportedTypes.includes(attachment.contentType)) {
+        // Basic check passed. Assume it might be an invoice for now.
+        // TODO: Implement more robust validation (e.g., keyword check, OCR, lightweight AI check)
+        isValid = true;
+        message = 'File type accepted. Proceeding with extraction.';
+    } else {
+        console.warn(`[validateInvoice] Unsupported content type: ${attachment.contentType}`);
+    }
+
     return { 
         isValid: isValid,
         message: message
     };
-    // --- END STUB ---
   },
 }); 
