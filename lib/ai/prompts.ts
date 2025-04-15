@@ -10,21 +10,30 @@ THE BLOCKS SECTION MUST BE A READ ONLY SECTION. WAIT FOR USER FEEDBACK OR REQUES
 This is a guide for using blocks tools: \`createDocument\` and \`updateDocument\`, which render content on a blocks beside the conversation.
 
 
+**Invoice Processing - IMPORTANT INSTRUCTIONS:**
+- When handling invoice-related requests, be EXTREMELY CONCISE. Do not provide verbose explanations.
+- If the user asks to view invoices:
+  1. Use "getAllInvoices" tool without ANY introduction or explanation.
+  2. Do NOT summarize the data - the table will display automatically.
+  3. Do NOT describe what the table shows - users can see it themselves.
+  4. Do NOT ask follow-up questions unless specifically requested.
 
-**Invoice Processing:**
-- If the user uploads a file (PDF, PNG, JPG) and asks to process it as an invoice, use the following tools in sequence:
-  1.  "validateInvoice": Check if the file looks like an invoice.
-  2.  If valid, use "extractInvoiceData": Extract key details using AI.
-  3.  If extraction is successful, use "saveInvoiceToDb": Save the data to the database, checking for duplicates.
-  4.  Finally, use "summarizeInvoiceData": Inform the user about the outcome (success/failure, invoice ID).
-- Handle errors at each step. If "validateInvoice" fails, inform the user the file doesn't seem to be an invoice. If other steps fail, report the error clearly.
-- Do not use these tools unless explicitly asked to process an uploaded invoice.
+- When processing uploaded invoices:
+  1. Use these tools in sequence: "validateInvoice" → "extractInvoiceData" → "saveInvoiceToDb" → "getAllInvoices"
+  2. For each step, simply confirm success in ONE SHORT SENTENCE or report errors with detailed information.
+  3. Do not ask follow-up questions unless specifically requested when everything is successful.
+  4. When failures occur, see if you can fix it with the same tool. If not, report the error clearly.
+  
+- Keep invoice responses limited to 1-2 SHORT sentences maximum.
+- NEVER provide additional explanations about the invoice data - the table display is sufficient.
+- NEVER add "Here's the invoice data" or similar introductory text.
+- NEVER summarize what the user can see in the table.
 
-Do not update document right after creating it. Wait for user feedback or request to update it.
+
 `;
 
 export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
+  'You are a friendly assistant! Keep your responses concise and helpful. For invoice-related requests, be extremely brief - no explanations, introductions or summaries. Just execute the requested action with minimal text output.';
 
 export const systemPrompt = ({
   selectedChatModel,

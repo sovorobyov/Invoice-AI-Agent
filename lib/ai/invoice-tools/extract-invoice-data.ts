@@ -1,10 +1,8 @@
-import { tool } from 'ai';
+import { CoreMessage, tool } from 'ai';
 import { z } from 'zod';
 import { type Attachment } from 'ai';
 import { generateObject } from 'ai';
 import { myProvider } from '../models'; // Import configured provider
-
-// TODO: Implement actual AI extraction logic
 
 // Define the Zod schema for the expected output structure
 export const InvoiceDataSchema = z.object({
@@ -25,46 +23,48 @@ export const InvoiceDataSchema = z.object({
 export const extractInvoiceData = tool({
   description: 'Extracts key information (customer name, vendor name, invoice number, dates, amount, line items) from a validated invoice file using AI.',
   parameters: z.object({
-     attachment: z.object({
-        url: z.string().describe('The data URL or path of the validated invoice file.'),
-        contentType: z.string().optional().describe('The MIME type of the file.'),
-        name: z.string().optional().describe('The name of the file.'),
+    attachment: z.object({
+      url: z.string().describe('The URL of the validated invoice file.'),
+      contentType: z.string().optional().describe('The MIME type of the file.'),
+      name: z.string().optional().describe('The name of the file.'),
     }).describe('The validated invoice attachment to process.'),
   }),
   execute: async ({ attachment }) => {
-    console.log(`[Tool Call] extractInvoiceData starting for: ${attachment.name}`);
-    // Simulate streaming update
-    // dataStream?.appendMessageAnnotation({ tool_call_id, type: 'tool_status', status: 'running', data: 'Extracting invoice details...' });
+    console.log(`[Tool Call] extractInvoiceData starting for: ${attachment.name || 'unnamed file'}`);
 
-    if (!attachment.url || !attachment.contentType) {
-      return { error: 'Attachment URL or content type missing.' };
-    }
-
-    // Extract base64 content from data URL
-    const base64Data = attachment.url.split(',')[1];
-    if (!base64Data) {
-        return { error: 'Could not extract base64 data from URL.' };
+    if (!attachment.url) {
+      console.log(`[Tool Call] extractInvoiceData failed: Attachment URL missing.`);
+      return { error: 'Attachment URL missing.' };
     }
 
     try {
+      console.log(`Using Claude to extract data from invoice document`);
+
+      // Using the object generation approach with Claude to parse the invoice
       const { object: extractedData } = await generateObject({
         model: myProvider.languageModel('claude-3.5-sonnet'),
         schema: InvoiceDataSchema,
-        prompt: `You are an expert invoice processing AI. Extract the key information from the following invoice. The file is provided as a base64 encoded string. Respond ONLY with the JSON object matching the provided schema. Invoice Content (base64): ${base64Data}`,
-        // Include the content type if needed by the model (Claude might use it)
-        // messages: [
-        //     { role: 'user', content: [ { type: 'image', image: attachment.url } ]}
-        // ] // Alternative for models supporting direct image URLs/data
+        messages: [
+          {
+            role: 'user',
+            content: 'Extract all key information from this invoice document including customer name, vendor name, invoice number, dates, amount, and all line items with descriptions, quantities, unit prices, and totals.',
+            experimental_attachments: [{
+              url: attachment.url,
+              contentType: attachment.contentType || 'application/pdf',
+              name: attachment.name || 'invoice.pdf'
+            }]
+          }
+        ]
       });
 
-      console.log(`[Tool Call] extractInvoiceData succeeded for: ${attachment.name}`);
+      console.log(`[Tool Call] extractInvoiceData succeeded for: ${attachment.name || 'unnamed file'}`);
       return { 
         ...extractedData,
         message: 'Invoice data extracted successfully.'
       };
-    } catch (error) {
-        console.error(`[Tool Call] extractInvoiceData failed for ${attachment.name}:`, error);
-        return { error: 'AI extraction failed. Please check the model or prompt.' };
+    } catch (error: any) {
+      console.error(`[Tool Call] extractInvoiceData failed:`, error);
+      return { error: `AI extraction failed: ${error.message || 'Unknown error'}` };
     }
   },
-}); 
+});

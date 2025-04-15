@@ -18,6 +18,7 @@ export const saveInvoiceToDb = tool({
     // attachment: z.object({ url: z.string(), name: z.string().optional(), contentType: z.string().optional() }).optional(), 
   }),
   execute: async ({ extractedData }) => {
+    console.log(`[Tool Call] saveInvoiceToDb attempting for: `, extractedData);
     const { vendor_name, invoice_number, amount, line_items: itemsToInsert, ...invoiceHeader } = extractedData;
     console.log(`[Tool Call] saveInvoiceToDb attempting for: ${invoice_number || 'Unknown Invoice'}`);
 

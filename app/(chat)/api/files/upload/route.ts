@@ -57,15 +57,19 @@ export async function POST(request: Request) {
       // Create data URL for immediate preview
       const dataURL = `data:${file.type};base64,${buffer.toString('base64')}`;
 
+      console.log(`File ${filename} uploaded successfully. Data URL size: ${dataURL.length}`);
       return NextResponse.json({
         url: dataURL,
         pathname: `/uploads/${uniqueFilename}`,
         contentType: file.type,
+        name: filename // Include the original filename
       });
     } catch (error) {
+      console.error('[API /files/upload] Failed during file processing:', error);
       return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
     }
   } catch (error) {
+    console.error('[API /files/upload] Failed to process request formData:', error);
     return NextResponse.json(
       { error: 'Failed to process request' },
       { status: 500 },

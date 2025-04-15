@@ -13,6 +13,7 @@ import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import { Weather } from './weather';
+import { InvoiceTable } from './invoice-table';
 import equal from 'fast-deep-equal';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
@@ -163,6 +164,11 @@ const PurePreviewMessage = ({
                             result={result}
                             isReadonly={isReadonly}
                           />
+                        ) : toolName === 'getAllInvoices' ? (
+                          <div className="w-full mt-4">
+                            <h3 className="text-base font-medium mb-2">Invoices</h3>
+                            <InvoiceTable invoices={result.invoices || []} />
+                          </div>
                         ) : (
                           // Don't render result for unknown/unhandled tools
                           null
